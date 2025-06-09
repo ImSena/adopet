@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import AdotanteRepository from "../repositories/AdotanteRepository";
 import AdotanteEntity from "../entities/AdotanteEntity";
+import EnderecoEntity from "../entities/EnderecoEntity";
 
 export default class AdotanteController{
     constructor(private repository: AdotanteRepository){}
@@ -65,6 +66,23 @@ export default class AdotanteController{
             const {id} = req.params;
 
             const {success, message} = await this.repository.deletarAdotante(Number(id));
+
+            if(!success){
+                return res.status(400).json({message});
+            }
+
+            return res.sendStatus(204);
+        }catch(error){
+            return res.status(400).json({error: "Erro ao deletar"});
+        }
+    }
+
+    async atualizarEnderecoAdotante(req: Request, res: Response)
+    {
+        try{
+            const {id} = req.params;
+
+            const {success, message} = await this.repository.atualizaEnderecoAdotante(Number(id), req.body as EnderecoEntity);
 
             if(!success){
                 return res.status(400).json({message});
