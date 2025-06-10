@@ -2,6 +2,7 @@ import { Repository } from "typeorm";
 import PetEntity from "../entities/PetEntity";
 import InterfacePetRepository from "./interfaces/InterfacePetRepository";
 import AdotanteEntity from "../entities/AdotanteEntity";
+import EnumPorte from "../enum/EnumPorte";
 
 export default class PetRepository implements InterfacePetRepository
 {
@@ -95,6 +96,19 @@ export default class PetRepository implements InterfacePetRepository
                 message: "Ocorreu um erro ao tentar adotar pet. "+error
             };
         }
+    }
+
+    async buscaPetPeloPorte(porte: EnumPorte): Promise<PetEntity[]>{
+       const pets =  await this.petRepository.find({where: {porte}});
+
+       return pets;
+    }
+
+    async buscaPorCampoGenerico<T extends keyof PetEntity>(campo: T, valor: PetEntity[T]):Promise<PetEntity[]>
+    {
+        const pets = await this.petRepository.find({where: {[campo]: valor}})
+
+        return pets;
     }
     
 }
