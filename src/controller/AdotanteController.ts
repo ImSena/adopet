@@ -2,13 +2,13 @@ import { Request, Response } from "express";
 import AdotanteRepository from "../repositories/AdotanteRepository";
 import AdotanteEntity from "../entities/AdotanteEntity";
 import EnderecoEntity from "../entities/EnderecoEntity";
-import { TypeRequestBodyAdotante, TypeResponseBodyAdotante } from "../types/TypeAdotante";
+import { TypeRequestBodyAdotante, TypeRequestParamsAdotante, TypeResponseBodyAdotante } from "../types/TypeAdotante";
 
 export default class AdotanteController {
     constructor(private repository: AdotanteRepository) { }
 
     async criaAdotante(
-        req: Request<{}, {}, TypeRequestBodyAdotante>,
+        req: Request<TypeRequestParamsAdotante, {}, TypeRequestBodyAdotante>,
         res: Response<TypeResponseBodyAdotante>
     ) {
 
@@ -28,17 +28,31 @@ export default class AdotanteController {
 
     }
 
-    async listarAdotantes(req: Request, res: Response) {
+    async listarAdotantes( 
+        req: Request<TypeRequestParamsAdotante, {}, TypeRequestBodyAdotante>,
+        res: Response<TypeResponseBodyAdotante>
+    ) {
         try {
             const adotantes = await this.repository.listaAdotantes();
 
-            res.status(200).json(adotantes);
+            const data = adotantes.map((adotante) => {
+                return {
+                    id: adotante.id,
+                    nome: adotante.nome,
+                    celular: adotante.celular
+                }
+            })
+
+            res.status(200).json({data});
         } catch (error) {
             return res.status(400).json({ error: "Erro ao listar adotantes" });
         }
     }
 
-    async atualizarAdotante(req: Request, res: Response) {
+    async atualizarAdotante( 
+        req: Request<TypeRequestParamsAdotante, {}, TypeRequestBodyAdotante>,
+        res: Response<TypeResponseBodyAdotante>
+    ) {
         try {
             const { id } = req.params;
 
@@ -48,7 +62,7 @@ export default class AdotanteController {
             );
 
             if (!success) {
-                return res.status(400).json({ message });
+                return res.status(400).json({ error: message });
             }
 
             return res.sendStatus(204);
@@ -57,7 +71,10 @@ export default class AdotanteController {
         }
     }
 
-    async deletarAdotante(req: Request, res: Response) {
+    async deletarAdotante( 
+        req: Request<TypeRequestParamsAdotante, {}, TypeRequestBodyAdotante>,
+        res: Response<TypeResponseBodyAdotante>
+    ) {
         try {
 
             const { id } = req.params;
@@ -65,7 +82,7 @@ export default class AdotanteController {
             const { success, message } = await this.repository.deletarAdotante(Number(id));
 
             if (!success) {
-                return res.status(400).json({ message });
+                return res.status(400).json({ error: message });
             }
 
             return res.sendStatus(204);
@@ -74,14 +91,17 @@ export default class AdotanteController {
         }
     }
 
-    async atualizarEnderecoAdotante(req: Request, res: Response) {
+    async atualizarEnderecoAdotante( 
+        req: Request<TypeRequestParamsAdotante, {}, TypeRequestBodyAdotante>,
+        res: Response<TypeResponseBodyAdotante>
+    ) {
         try {
             const { id } = req.params;
 
-            const { success, message } = await this.repository.atualizaEnderecoAdotante(Number(id), req.body as EnderecoEntity);
+            const { success, message } = await this.repository.atualizaEnderecoAdotante(Number(id), req.body.endereco as EnderecoEntity);
 
             if (!success) {
-                return res.status(400).json({ message });
+                return res.status(400).json({ error: message });
             }
 
             return res.sendStatus(204);
