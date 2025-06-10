@@ -13,7 +13,7 @@ export default class AdotanteController {
     ) {
 
         const { nome, celular, endereco, foto, senha } = req.body as AdotanteEntity;
-
+    
         const novoAdotante = new AdotanteEntity(
             nome,
             senha,
